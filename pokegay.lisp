@@ -3,7 +3,9 @@
 (in-package #:pokegay)
 
 ;; bug in textery passes a second argument into a function call that doesnt need it
+;; different bug in textery requires the function be declared in cl-user package
 (defun cl-user::prepare-pokemon-name (text _)
+  "convert pokemon's name to emojo format"
   (declare (ignore _))
   (string-downcase
    (str:replace-all "♂" "_m"
@@ -12,25 +14,40 @@
                                                       (str:replace-all " " "_" text))))))
 
 (defun first-run-p ()
-  (probe-file #P".first-run"))
+  "is this the first time we've ran?"
+  (not (probe-file #P".first-run")))
 
 (defun create-first-run-file ()
+  "create the first run file so we dont run again"
   (with-open-file (out ".first-run" :direction :output
                                     :if-does-not-exist :create)
     (format out "bwamp bwomp")))
 
 (defun main ()
+  "binary entry point"
   (handler-case
       (with-user-abort
+
+        ;; if we can't load the json, error out
         (unless (load-grammar "pokemon.json")
           (error "could not find pokemon names file"))
+
+        ;; run the bot
         (run-bot ((make-instance 'mastodon-bot :config-file "config.file") :with-websocket nil)
+          ;; run every 2 hours, but start NOW
           (after-every (2 :hours :run-immediately t)
             (if (first-run-p)
-                (post (expand (format nil "#alert#~%:#names.prepare-pokemon-name#: gay")))
                 (progn
                   (create-first-run-file)
-                  (post (expand (format nil "#alert#~%:quagsire: gay"))))))))
-    (user-abort ())
+                  ;; fulfill the prophecy:
+                  ;; https://twitter.com/_compufox/status/1333200391593455618
+                  (post (expand (format nil "#alert#~%:quagsire: gay"))))
+
+                ;; post about a random pokemon
+                (post (expand (format nil "#alert#~%:#names.prepare-pokemon-name#: gay")))))))
+
+    ;; if the user aborts (Ctrl-C's) use then we catch it gracefully
+    (user-abort ()
+      (format t "quitting~%"))
     (error (e)
       (format t "~A~%" e))))
