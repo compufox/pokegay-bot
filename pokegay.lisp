@@ -2,16 +2,14 @@
 
 (in-package #:pokegay)
 
-;; bug in textery passes a second argument into a function call that doesnt need it
-;; different bug in textery requires the function be declared in cl-user package
-(defun cl-user::prepare-pokemon-name (text _)
+(defun prepare-pokemon-name (text)
   "convert pokemon's name to emojo format"
-  (declare (ignore _))
   (string-downcase
-   (str:replace-all "♂" "_m"
-                    (str:replace-all "♀" "_f"
-                                     (str:replace-all "." ""
-                                                      (str:replace-all " " "_" text))))))
+   (str:replace-all "-" "_"
+     (str:replace-all "♂" "_m"
+       (str:replace-all "♀" "_f"
+         (str:replace-all "." ""
+           (str:replace-all " " "_" text)))))))
 
 (defun first-run-p ()
   "is this the first time we've ran?"
