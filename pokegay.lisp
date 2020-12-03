@@ -42,7 +42,7 @@
                   (post (expand (format nil "#alert#~%:quagsire: gay"))))
 
                 ;; post about a random pokemon
-                (post (expand (format nil "#alert#~%:#names.prepare-pokemon-name#: gay")))))))
+                (post (expand (format nil "#alert#~%:#names.pokegay::prepare-pokemon-name#: gay")))))))
 
     ;; if the user aborts (Ctrl-C's) use then we catch it gracefully
     (user-abort ()
